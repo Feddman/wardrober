@@ -53,6 +53,58 @@ app.post('/analyze-outfit', async (req, res) => {
   }
 });
 
+const GenerateBody = z.object({
+  suggestionsFormal: z.array(z.string()).optional().default([]),
+  suggestionsCasual: z.array(z.string()).optional().default([]),
+  items: z.array(z.object({ type: z.string(), color: z.string().optional() })).optional().default([])
+});
+
+app.post('/generate-examples', async (req, res) => {
+  try {
+    const body = GenerateBody.parse(req.body);
+
+    const topFormal = body.suggestionsFormal[0] || 'smart casual outfit with blazer and leather shoes';
+    const topCasual = body.suggestionsCasual[0] || 'casual outfit with denim jacket and sneakers';
+
+    const colorHints = body.items
+      .filter((it) => it.color)
+      .slice(0, 2)
+      .map((it) => `${it.type} in ${it.color}`)
+      .join(', ');
+
+    function buildPrompt(tone, suggestion) {
+      return [
+        'High-quality editorial fashion photo of a full outfit, single person, neutral background, natural lighting, street style.',
+        tone ? `Style: ${tone}.` : '',
+        suggestion ? `Inspiration: ${suggestion}.` : '',
+        colorHints ? `Colors to incorporate (optional): ${colorHints}.` : '',
+        'No logos or brand text.'
+      ]
+        .filter(Boolean)
+        .join(' ');
+    }
+
+    const [formalRes, casualRes] = await Promise.all([
+      client.images.generate({ model: 'gpt-image-1', prompt: buildPrompt('more formal', topFormal), size: '768x1024', n: 1 }),
+      client.images.generate({ model: 'gpt-image-1', prompt: buildPrompt('more casual', topCasual), size: '768x1024', n: 1 })
+    ]);
+
+    const img1 = formalRes?.data?.[0]?.b64_json;
+    const img2 = casualRes?.data?.[0]?.b64_json;
+    if (!img1 || !img2) throw new Error('Image generation failed');
+
+    const out = [
+      `data:image/png;base64,${img1}`,
+      `data:image/png;base64,${img2}`
+    ];
+
+    res.json({ ok: true, images: out });
+  } catch (err) {
+    console.error('generate-examples error', err);
+    res.status(400).json({ ok: false, error: err.message || 'Bad Request' });
+  }
+});
+
 app.get('/proxy-image', async (req, res) => {
   try {
     const url = req.query.url;

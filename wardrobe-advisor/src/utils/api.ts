@@ -58,3 +58,18 @@ export async function analyzeOutfit(imageUri: string, context: 'selfie' | 'mirro
   if (!json.ok) throw new Error(json.error || 'Analyze failed');
   return json.data as OutfitAnalysis;
 }
+
+export async function generateExampleImages(formal: string[], casual: string[], items: OutfitItem[]): Promise<string[]> {
+  const res = await fetch(`${API_BASE}/generate-examples`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ suggestionsFormal: formal, suggestionsCasual: casual, items })
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Generate failed: ${text}`);
+  }
+  const json = await res.json();
+  if (!json.ok) throw new Error(json.error || 'Generate failed');
+  return json.images as string[];
+}

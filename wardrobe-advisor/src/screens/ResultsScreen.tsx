@@ -1,6 +1,6 @@
 import { useRoute } from '@react-navigation/native';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { analyzeOutfit, OutfitAnalysis } from '../utils/api';
+import { analyzeOutfit, OutfitAnalysis, generateExampleImages } from '../utils/api';
 import { buildExampleImageUrls, wrapWithProxy } from '../utils/examples';
 import ImageScroller from '../components/ImageScroller';
 import { useState } from 'react';
@@ -10,6 +10,7 @@ export default function ResultsScreen() {
   const imageUri = route.params?.imageUri as string;
   const [analysis, setAnalysis] = useState<OutfitAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
+  const [exampleImages, setExampleImages] = useState<string[] | null>(null);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -23,6 +24,13 @@ export default function ResultsScreen() {
               setLoading(true);
               const res = await analyzeOutfit(imageUri);
               setAnalysis(res);
+              try {
+                const imgs = await generateExampleImages(res.advice?.moreFormal ?? [], res.advice?.moreCasual ?? [], res.items ?? []);
+                setExampleImages(imgs.slice(0, 2));
+              } catch (e) {
+                // non-fatal if generation fails
+                console.warn('generate examples failed', e);
+              }
             } catch (e: any) {
               alert(e?.message || 'Failed to analyze');
             } finally {
@@ -56,7 +64,9 @@ export default function ResultsScreen() {
               {analysis.advice.moreFormal.map((t, i) => (
                 <Text key={i} style={styles.cardText}>- {t}</Text>
               ))}
-              <ImageScroller title="Examples" urls={wrapWithProxy(buildExampleImageUrls(analysis.advice.moreFormal, 10, 'formal'))} />
+              {exampleImages?.[0] && (
+                <ImageScroller title="AI Example" urls={[exampleImages[0]]} />
+              )}
             </>
           ) : (
             <Text style={styles.cardText}>No tips.</Text>
@@ -69,7 +79,9 @@ export default function ResultsScreen() {
               {analysis.advice.moreCasual.map((t, i) => (
                 <Text key={i} style={styles.cardText}>- {t}</Text>
               ))}
-              <ImageScroller title="Examples" urls={wrapWithProxy(buildExampleImageUrls(analysis.advice.moreCasual, 10, 'casual'))} />
+              {exampleImages?.[1] && (
+                <ImageScroller title="AI Example" urls={[exampleImages[1]]} />
+              )}
             </>
           ) : (
             <Text style={styles.cardText}>No tips.</Text>
