@@ -21,9 +21,9 @@ export function buildExampleImageUrls(suggestions: string[], total: number = 8, 
   while (urls.length < total) {
     const suggestion = suggestions[i % suggestions.length];
     const query = buildQueryFromSuggestion(suggestion);
-    const lock = `${seedPrefix}-${i}`;
-    // loremflickr provides keyword-based placeholder images with a 'lock' to keep results stable
-    const url = `https://loremflickr.com/560/840/${encodeURIComponent(query)}?lock=${encodeURIComponent(lock)}`;
+    const seed = `${seedPrefix}-${i}-${encodeURIComponent(suggestion.slice(0, 24))}`;
+    // Use Unsplash Source with a stable seed and keyword query
+    const url = `https://source.unsplash.com/seed/${seed}/640x960/?${encodeURIComponent(query)}`;
     urls.push(url);
     i += 1;
   }

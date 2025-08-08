@@ -1,4 +1,5 @@
-import { ScrollView, Image, View, Text, StyleSheet } from 'react-native';
+import { ScrollView, View, Text, StyleSheet } from 'react-native';
+import SmartImage from './SmartImage';
 
 export default function ImageScroller({ title, urls }: { title: string; urls: string[] }) {
   if (!urls || urls.length === 0) return null;
@@ -7,7 +8,7 @@ export default function ImageScroller({ title, urls }: { title: string; urls: st
       <Text style={styles.title}>{title}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {urls.map((u, i) => (
-          <Image key={i} source={{ uri: u }} style={styles.image} resizeMode="cover" onError={(e) => console.warn('image failed', u)} />
+          <SmartImage key={i} uri={u} style={styles.image} />
         ))}
       </ScrollView>
     </View>
