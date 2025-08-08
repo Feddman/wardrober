@@ -1,6 +1,8 @@
 import { useRoute } from '@react-navigation/native';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { analyzeOutfit, OutfitAnalysis } from '../utils/api';
+import { buildExampleImageUrls } from '../utils/examples';
+import ImageScroller from '../components/ImageScroller';
 import { useState } from 'react';
 
 export default function ResultsScreen() {
@@ -50,9 +52,12 @@ export default function ResultsScreen() {
           <View style={{ height: 12 }} />
           <Text style={styles.cardTitle}>Make it more formal</Text>
           {analysis.advice?.moreFormal?.length ? (
-            analysis.advice.moreFormal.map((t, i) => (
-              <Text key={i} style={styles.cardText}>- {t}</Text>
-            ))
+            <>
+              {analysis.advice.moreFormal.map((t, i) => (
+                <Text key={i} style={styles.cardText}>- {t}</Text>
+              ))}
+              <ImageScroller title="Examples" urls={buildExampleImageUrls(analysis.advice.moreFormal, 10, 'formal')} />
+            </>
           ) : (
             <Text style={styles.cardText}>No tips.</Text>
           )}
@@ -60,9 +65,12 @@ export default function ResultsScreen() {
           <View style={{ height: 12 }} />
           <Text style={styles.cardTitle}>Make it more casual</Text>
           {analysis.advice?.moreCasual?.length ? (
-            analysis.advice.moreCasual.map((t, i) => (
-              <Text key={i} style={styles.cardText}>- {t}</Text>
-            ))
+            <>
+              {analysis.advice.moreCasual.map((t, i) => (
+                <Text key={i} style={styles.cardText}>- {t}</Text>
+              ))}
+              <ImageScroller title="Examples" urls={buildExampleImageUrls(analysis.advice.moreCasual, 10, 'casual')} />
+            </>
           ) : (
             <Text style={styles.cardText}>No tips.</Text>
           )}
