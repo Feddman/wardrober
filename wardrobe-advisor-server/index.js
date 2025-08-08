@@ -53,6 +53,23 @@ app.post('/analyze-outfit', async (req, res) => {
   }
 });
 
+app.get('/proxy-image', async (req, res) => {
+  try {
+    const url = req.query.url;
+    if (!url || typeof url !== 'string') return res.status(400).send('Missing url');
+    const r = await fetch(url, { redirect: 'follow' });
+    if (!r.ok) return res.status(502).send(`Upstream error: ${r.status}`);
+    const contentType = r.headers.get('content-type') || 'image/jpeg';
+    const buf = Buffer.from(await r.arrayBuffer());
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    return res.send(buf);
+  } catch (e) {
+    console.error('proxy-image error', e);
+    return res.status(500).send('Proxy failed');
+  }
+});
+
 app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 5055;

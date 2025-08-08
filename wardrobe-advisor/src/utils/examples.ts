@@ -29,3 +29,9 @@ export function buildExampleImageUrls(suggestions: string[], total: number = 8, 
   }
   return urls;
 }
+
+export function wrapWithProxy(urls: string[], apiBase?: string): string[] {
+  const base = apiBase || (process.env.EXPO_PUBLIC_API_BASE ?? '');
+  if (!base) return urls;
+  return urls.map((u) => `${base}/proxy-image?url=${encodeURIComponent(u)}`);
+}

@@ -1,7 +1,7 @@
 import { useRoute } from '@react-navigation/native';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { analyzeOutfit, OutfitAnalysis } from '../utils/api';
-import { buildExampleImageUrls } from '../utils/examples';
+import { buildExampleImageUrls, wrapWithProxy } from '../utils/examples';
 import ImageScroller from '../components/ImageScroller';
 import { useState } from 'react';
 
@@ -56,7 +56,7 @@ export default function ResultsScreen() {
               {analysis.advice.moreFormal.map((t, i) => (
                 <Text key={i} style={styles.cardText}>- {t}</Text>
               ))}
-              <ImageScroller title="Examples" urls={buildExampleImageUrls(analysis.advice.moreFormal, 10, 'formal')} />
+              <ImageScroller title="Examples" urls={wrapWithProxy(buildExampleImageUrls(analysis.advice.moreFormal, 10, 'formal'))} />
             </>
           ) : (
             <Text style={styles.cardText}>No tips.</Text>
@@ -69,7 +69,7 @@ export default function ResultsScreen() {
               {analysis.advice.moreCasual.map((t, i) => (
                 <Text key={i} style={styles.cardText}>- {t}</Text>
               ))}
-              <ImageScroller title="Examples" urls={buildExampleImageUrls(analysis.advice.moreCasual, 10, 'casual')} />
+              <ImageScroller title="Examples" urls={wrapWithProxy(buildExampleImageUrls(analysis.advice.moreCasual, 10, 'casual'))} />
             </>
           ) : (
             <Text style={styles.cardText}>No tips.</Text>
