@@ -7,7 +7,7 @@ export default function ImageScroller({ title, urls }: { title: string; urls: st
       <Text style={styles.title}>{title}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.row}>
         {urls.map((u, i) => (
-          <Image key={i} source={{ uri: u }} style={styles.image} resizeMode="cover" />
+          <Image key={i} source={{ uri: u }} style={styles.image} resizeMode="cover" onError={(e) => console.warn('image failed', u)} />
         ))}
       </ScrollView>
     </View>
