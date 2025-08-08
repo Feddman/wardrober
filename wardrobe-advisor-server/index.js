@@ -30,8 +30,8 @@ app.post('/analyze-outfit', async (req, res) => {
         content: [
           { type: 'text', text: 'Analyze this outfit and respond as JSON with {items: [{type, color, notes?}], advice: {moreFormal: string[], moreCasual: string[]}}' },
           {
-            type: 'input_image',
-            image_url: `data:image/jpeg;base64,${body.imageBase64}`
+            type: 'image_url',
+            image_url: { url: `data:image/jpeg;base64,${body.imageBase64}` }
           }
         ]
       }
