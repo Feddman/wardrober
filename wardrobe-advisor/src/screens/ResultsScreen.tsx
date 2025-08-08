@@ -1,6 +1,7 @@
 import { RouteProp, useRoute } from '@react-navigation/native';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { generateColorPlan, Formality } from '../utils/colorEngine';
+import { analyzeOutfit, OutfitAnalysis } from '../utils/api';
 import { useState } from 'react';
 
 export default function ResultsScreen() {
@@ -8,6 +9,8 @@ export default function ResultsScreen() {
   const imageUri = route.params?.imageUri as string;
   const [formality, setFormality] = useState<Formality>('casual');
   const [metal, setMetal] = useState<'gold' | 'silver' | 'both'>('both');
+  const [analysis, setAnalysis] = useState<OutfitAnalysis | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const baseColor = route.params?.baseColor as string | undefined;
   const plan = generateColorPlan({ baseColors: [baseColor ?? '#1F2937'], formality, preferredMetal: metal });
@@ -32,7 +35,44 @@ export default function ResultsScreen() {
             </TouchableOpacity>
           ))}
         </View>
+        <View style={{ height: 8 }} />
+        <TouchableOpacity
+          style={[styles.secondary, loading && { opacity: 0.7 }]}
+          disabled={loading}
+          onPress={async () => {
+            try {
+              setLoading(true);
+              const res = await analyzeOutfit(imageUri);
+              setAnalysis(res);
+            } catch (e) {
+              console.warn(e);
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <Text style={styles.secondaryText}>{loading ? 'Analyzing…' : 'Analyze with AI'}</Text>
+        </TouchableOpacity>
       </View>
+
+      {analysis && (
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Detected items</Text>
+          {analysis.items?.map((it, i) => (
+            <Text key={i} style={styles.cardText}>- {it.type}{it.color ? ` (${it.color})` : ''}{it.notes ? ` — ${it.notes}` : ''}</Text>
+          ))}
+          <View style={{ height: 8 }} />
+          <Text style={styles.cardTitle}>Make it more formal</Text>
+          {analysis.advice?.moreFormal?.map((t, i) => (
+            <Text key={i} style={styles.cardText}>- {t}</Text>
+          ))}
+          <View style={{ height: 8 }} />
+          <Text style={styles.cardTitle}>Make it more casual</Text>
+          {analysis.advice?.moreCasual?.map((t, i) => (
+            <Text key={i} style={styles.cardText}>- {t}</Text>
+          ))}
+        </View>
+      )}
 
       <Text style={styles.sectionTitle}>Suggestions</Text>
       {plan.suggestions.map((s, idx) => (
