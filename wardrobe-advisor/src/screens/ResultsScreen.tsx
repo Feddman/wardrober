@@ -94,6 +94,8 @@ const styles = StyleSheet.create({
   container: { padding: 16 },
   image: { width: '100%', height: 360, borderRadius: 12, marginBottom: 12, backgroundColor: '#eee' },
   controls: { marginBottom: 12 },
+  secondary: { backgroundColor: '#E5E7EB', paddingVertical: 10, borderRadius: 10, alignItems: 'center' },
+  secondaryText: { color: '#111827', fontWeight: '700' },
   row: { flexDirection: 'row', gap: 8 },
   chip: { paddingVertical: 6, paddingHorizontal: 12, borderRadius: 16, backgroundColor: '#E5E7EB' },
   chipActive: { backgroundColor: '#111827' },
