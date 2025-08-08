@@ -3,12 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const { z } = require('zod');
 const OpenAI = require('openai');
+const fal = require('@fal-ai/client');
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '20mb' }));
 
 const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+fal.config({ credentials: process.env.FAL_KEY });
 
 const AnalyzeBody = z.object({
   imageBase64: z.string().min(10),
@@ -82,6 +84,19 @@ app.post('/generate-examples', async (req, res) => {
       ]
         .filter(Boolean)
         .join(' ');
+    }
+
+    const provider = (process.env.IMAGE_PROVIDER || 'openai').toLowerCase();
+
+    if (provider === 'fal') {
+      const [formalRes, casualRes] = await Promise.all([
+        fal.subscribe('fal-ai/flux/schnell', { input: { prompt: buildPrompt('more formal', topFormal), image_size: 'portrait_4_3' } }),
+        fal.subscribe('fal-ai/flux/schnell', { input: { prompt: buildPrompt('more casual', topCasual), image_size: 'portrait_4_3' } }),
+      ]);
+      const url1 = formalRes?.images?.[0]?.url;
+      const url2 = casualRes?.images?.[0]?.url;
+      if (!url1 || !url2) throw new Error('Fal image generation failed');
+      return res.json({ ok: true, images: [url1, url2] });
     }
 
     const [formalRes, casualRes] = await Promise.all([
