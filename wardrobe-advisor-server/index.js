@@ -85,8 +85,8 @@ app.post('/generate-examples', async (req, res) => {
     }
 
     const [formalRes, casualRes] = await Promise.all([
-      client.images.generate({ model: 'gpt-image-1', prompt: buildPrompt('more formal', topFormal), size: '768x1024', n: 1 }),
-      client.images.generate({ model: 'gpt-image-1', prompt: buildPrompt('more casual', topCasual), size: '768x1024', n: 1 })
+      client.images.generate({ model: 'gpt-image-1', prompt: buildPrompt('more formal', topFormal), size: '1024x1536', n: 1 }),
+      client.images.generate({ model: 'gpt-image-1', prompt: buildPrompt('more casual', topCasual), size: '1024x1536', n: 1 })
     ]);
 
     const img1 = formalRes?.data?.[0]?.b64_json;
