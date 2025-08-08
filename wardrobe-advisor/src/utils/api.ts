@@ -1,5 +1,6 @@
 import * as FileSystem from 'expo-file-system';
 import { Platform } from 'react-native';
+import { downscaleImageWeb } from './imageUtil';
 
 export type OutfitItem = { type: string; color?: string; notes?: string };
 export type OutfitAdvice = { moreFormal: string[]; moreCasual: string[] };
@@ -29,9 +30,17 @@ async function uriToBase64Web(uri: string): Promise<string> {
 }
 
 export async function analyzeOutfit(imageUri: string, context: 'selfie' | 'mirror' = 'mirror'): Promise<OutfitAnalysis> {
+  // Quick server reachability check to fail fast with clearer message
+  try {
+    const ping = await fetch(`${API_BASE}/health`, { method: 'GET' });
+    if (!ping.ok) throw new Error('Server not reachable');
+  } catch (e) {
+    throw new Error(`Cannot reach AI server at ${API_BASE}. Is it running?`);
+  }
   let base64: string;
   if (Platform.OS === 'web') {
-    base64 = await uriToBase64Web(imageUri);
+    const scaledDataUrl = await downscaleImageWeb(imageUri, 1200);
+    base64 = await uriToBase64Web(scaledDataUrl);
   } else {
     base64 = await FileSystem.readAsStringAsync(imageUri, { encoding: FileSystem.EncodingType.Base64 });
   }

@@ -44,8 +44,8 @@ export default function ResultsScreen() {
               setLoading(true);
               const res = await analyzeOutfit(imageUri);
               setAnalysis(res);
-            } catch (e) {
-              console.warn(e);
+            } catch (e: any) {
+              alert(e?.message || 'Failed to analyze');
             } finally {
               setLoading(false);
             }
